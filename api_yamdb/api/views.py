@@ -2,7 +2,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from api_yamdb.models import Category, Genre, Title
+from posts.models import Category, Genre, Title
 from .serializers import (
     CategorySerializer,
     GenreSerializer,

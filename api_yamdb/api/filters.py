@@ -1,5 +1,5 @@
 from django_filters import rest_framework as filters
-from api_yamdb.models import Title
+from posts.models import Title
 
 
 class TitleFilter(filters.FilterSet):
