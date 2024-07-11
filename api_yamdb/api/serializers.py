@@ -5,6 +5,7 @@ from posts.models import Category, Comment, Genre, Review, Title
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """Сериализатор для категорий."""
 
     class Meta:
         model = Category
@@ -12,6 +13,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    """Сериализатор для жанров."""
 
     class Meta:
         model = Genre
@@ -19,6 +21,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    """Сериализатор для произведений."""
+
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
     rating = serializers.FloatField(read_only=True)
@@ -29,6 +33,8 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
+    """Сериализатор для создания произведений."""
+
     genre = serializers.SlugRelatedField(
         slug_field='slug', many=True, queryset=Genre.objects.all()
     )
@@ -42,6 +48,8 @@ class TitleCreateSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    """Сериализатор для отзывов."""
+
     score = serializers.IntegerField(validators=[MinValueValidator(1),
                                                  MaxValueValidator(10)])
 
@@ -51,6 +59,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """Сериализатор для комментариев."""
 
     class Meta:
         model = Comment

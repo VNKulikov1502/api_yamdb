@@ -15,6 +15,8 @@ from .serializers import (CategorySerializer, CommentSerializer,
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
+    """ViewSet для работы с категориями."""
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -30,6 +32,8 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 
 class GenreViewSet(viewsets.ModelViewSet):
+    """ViewSet для работы с жанрами."""
+
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -45,6 +49,8 @@ class GenreViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    """ViewSet для работы с произведениями."""
+
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
@@ -60,6 +66,8 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    """ViewSet для работы с отзывами к произведениям."""
+
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthorOrReadOnly]
     pagination_class = PageNumberPagination
@@ -82,6 +90,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """ViewSet для работы с комментариями."""
+
     serializer_class = CommentSerializer
     permission_classes = [IsAuthorOrReadOnly]
     pagination_class = PageNumberPagination

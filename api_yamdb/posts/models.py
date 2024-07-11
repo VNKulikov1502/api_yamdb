@@ -6,6 +6,8 @@ User = get_user_model()
 
 
 class Category(models.Model):
+    """Модель для категорий произведений."""
+
     name = models.CharField(max_length=256)
     slug = models.SlugField(max_length=50, unique=True)
 
@@ -14,6 +16,8 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
+    """Модель для жанров произведений."""
+
     name = models.CharField(max_length=256)
     slug = models.SlugField(max_length=50, unique=True)
 
@@ -22,6 +26,8 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
+    """Модель для произведений."""
+
     name = models.CharField(max_length=256)
     year = models.IntegerField()
     description = models.TextField(blank=True, null=True)
@@ -34,6 +40,8 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
+    """Модель для связи произведений и жанров."""
+
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
@@ -42,6 +50,8 @@ class GenreTitle(models.Model):
 
 
 class Review(models.Model):
+    """Модель для отзывов."""
+
     title = models.ForeignKey(Title, on_delete=models.CASCADE,
                               related_name='reviews')
     text = models.CharField(max_length=4096)
@@ -57,6 +67,8 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
+    """Модель для комментариев."""
+
     review = models.ForeignKey(Review, on_delete=models.CASCADE,
                                related_name='comments')
     text = models.TextField(max_length=512)
