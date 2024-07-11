@@ -63,9 +63,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthorOrReadOnly]
     pagination_class = PageNumberPagination
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    filterset_fields = ('author', 'pub_date')
-    search_fields = ('text', 'author')
 
     def get_queryset(self):
         title_id = self.kwargs['title_id']
@@ -88,9 +85,6 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [IsAuthorOrReadOnly]
     pagination_class = PageNumberPagination
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    filterset_fields = ('author', 'pub_date')
-    search_fields = ('text', 'author')
 
     def get_queryset(self):
         review_id = self.kwargs['review_id']
