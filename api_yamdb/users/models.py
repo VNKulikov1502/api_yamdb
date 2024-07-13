@@ -2,8 +2,6 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 
-from api_yamdb.settings import LENGTH_TEXT
-
 from .enums import UserRoles
 
 
@@ -52,7 +50,7 @@ class User(AbstractUser):
         ordering = ('id',)
 
     def __str__(self):
-        return self.username[:LENGTH_TEXT]
+        return self.username[:150]
 
     @property
     def is_admin(self):
