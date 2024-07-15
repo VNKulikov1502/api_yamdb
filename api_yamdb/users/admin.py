@@ -1,7 +1,5 @@
 from django.contrib import admin
 
-from api_yamdb.settings import LIST_PER_PAGE
-
 from .models import User
 
 
@@ -22,5 +20,4 @@ class UserAdmin(admin.ModelAdmin):
     empty_value_display = 'значение отсутствует'
     list_editable = ('role',)
     list_filter = ('username',)
-    list_per_page = LIST_PER_PAGE
     search_fields = ('username', 'role')
