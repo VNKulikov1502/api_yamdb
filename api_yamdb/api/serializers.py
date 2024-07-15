@@ -2,6 +2,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from rest_framework import serializers
 
 from posts.models import Category, Comment, Genre, Review, Title
+from django.db import models
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -32,6 +33,7 @@ class TitleCreateSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         slug_field='slug', many=True, queryset=Genre.objects.all()
     )
+    name = models.CharField(max_length=256)
     category = serializers.SlugRelatedField(
         slug_field='slug', queryset=Category.objects.all()
     )
