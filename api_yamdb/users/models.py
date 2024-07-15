@@ -4,6 +4,7 @@ from django.db import models
 
 from .enums import UserRoles
 
+
 class User(AbstractUser):
     """Класс пользователей."""
 
