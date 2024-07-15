@@ -2,10 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 
-from api_yamdb.settings import LENGTH_TEXT
-
 from .enums import UserRoles
-
 
 class User(AbstractUser):
     """Класс пользователей."""
@@ -45,6 +42,20 @@ class User(AbstractUser):
         choices=UserRoles.choices(),
         default=UserRoles.user.name
     )
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='custom_user_set',
+        blank=True,
+        help_text='The groups this user belongs to.',
+        verbose_name='groups',
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='custom_user_permissions_set',
+        blank=True,
+        help_text='Specific permissions for this user.',
+        verbose_name='user permissions',
+    )
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -52,7 +63,7 @@ class User(AbstractUser):
         ordering = ('id',)
 
     def __str__(self):
-        return self.username[:LENGTH_TEXT]
+        return self.username[:150]
 
     @property
     def is_admin(self):

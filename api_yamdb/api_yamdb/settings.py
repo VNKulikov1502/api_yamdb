@@ -18,8 +18,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',  # Добавляем Django REST framework
-    'users',  # Добавляем приложение users
+    'rest_framework',
+    'users',
+    'posts',
 ]
 
 MIDDLEWARE = [
@@ -78,7 +79,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'UTC'
 
@@ -95,3 +96,6 @@ STATICFILES_DIRS = [BASE_DIR / 'static/']
 # Custom settings
 LENGTH_TEXT = 15
 LIST_PER_PAGE = 10
+
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
