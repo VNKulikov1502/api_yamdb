@@ -1,18 +1,111 @@
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.db import IntegrityError
+from django.shortcuts import get_object_or_404
+from rest_framework import (
+    filters, status, views, viewsets
+)
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import AccessToken
+
 from .models import User
-from .serializers import UserSerializer
+from .permissions import IsAdminOrSuper
+from .serializers import (
+    SignUpSerializer,
+    TokenSerializer,
+    UserSerializer,
+)
+from .enums import UserRoles
 
-
-class UsersListView(generics.ListAPIView):
-    """Представление для отображения списка пользователей."""
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrSuper,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+    lookup_field = 'username'
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
+    @action(
+        detail=False,
+        url_path='me',
+        methods=['get', 'patch'],
+        permission_classes=[IsAuthenticated],
+    )
+    def update_profile(self, request):
+        serializer = UserSerializer(request.user)
+        if request.method == 'PATCH':
+            serializer = UserSerializer(
+                request.user,
+                data=request.data,
+                partial=True,
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        serializer = UserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            user = User.objects.create(
+                email=serializer.validated_data['email'],
+                username=serializer.validated_data['username'],
+                first_name=serializer.validated_data.get('first_name'),
+                last_name=serializer.validated_data.get('last_name'),
+                bio=serializer.validated_data.get('bio'),
+            )
+            user.set_password(serializer.validated_data['password'])
+            user.save()
+
+            # Присваиваем роли по умолчанию
+            user.groups.add(UserRoles.user.value)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except IntegrityError as error:
+            return Response(f'{error}', status=status.HTTP_400_BAD_REQUEST)
+
+class SignUpView(views.APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        serializer = SignUpSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            user, created = User.objects.get_or_create(
+                email=serializer.validated_data.get('email'),
+                username=serializer.validated_data.get('username'),
+            )
+        except IntegrityError as error:
+            return Response(f'{error}', status=status.HTTP_400_BAD_REQUEST)
+
+        confirmation_code = default_token_generator.make_token(user)
+        send_mail(
+            subject='Код подтверждения',
+            message=f'Код: {confirmation_code}.',
+            from_email=settings.EMAIL_ADMIN,
+            recipient_list=[user.email],
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class UserDetailView(generics.RetrieveAPIView):
-    """Представление для просмотра детальной информации о пользователе."""
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (IsAuthenticated,)
+class AuthTokenView(views.APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        serializer = TokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data['username']
+        confirmation_code = serializer.validated_data['confirmation_code']
+        user = get_object_or_404(User, username=username)
+        if not default_token_generator.check_token(user, confirmation_code):
+            return Response(
+                {'confirmation_code': ['Код подтверждения неверный']},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        access_token = AccessToken.for_user(user)
+        return Response({'token': str(access_token)})
