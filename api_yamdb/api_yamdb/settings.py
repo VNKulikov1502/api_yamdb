@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
+    'django_filters',
     'users',
     'posts',
 ]
@@ -114,4 +115,9 @@ SIMPLE_JWT = {
 
 LENGTH_TEXT = 15
 LIST_PER_PAGE = 10
-EMAIL_YAMDB = 'registration_YaMDb@mail.com'
+
+EMAIL_ADMIN = 'admin@yamdb.ru'
+
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+
+EMAIL_FILE_PATH = (BASE_DIR, 'sent_emails')

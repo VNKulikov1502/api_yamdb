@@ -4,6 +4,7 @@ from rest_framework import filters, status, viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from posts.models import Category, Comment, Genre, Review, Title
 
@@ -15,7 +16,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
+    queryset = Category.objects.all().order_by('id')  # Добавьте order_by
     serializer_class = CategorySerializer
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [filters.SearchFilter]
@@ -30,7 +31,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 
 class GenreViewSet(viewsets.ModelViewSet):
-    queryset = Genre.objects.all()
+    queryset = Genre.objects.all().order_by('id')  # Добавьте order_by
     serializer_class = GenreSerializer
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [filters.SearchFilter]
@@ -51,7 +52,11 @@ class TitleViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
-        return Title.objects.annotate(rating=Avg('reviews__score'))
+        return (
+            Title.objects
+            .annotate(rating=Avg('reviews__score'))
+            .order_by('id')
+        )
 
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):
@@ -73,12 +78,12 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthorOrReadOnly]
+    permission_classes = [IsAuthorOrReadOnly, IsAuthenticatedOrReadOnly]
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
         title_id = self.kwargs['title_id']
-        return Review.objects.filter(title__id=title_id)
+        return Review.objects.filter(title__id=title_id).order_by('id')
 
     def perform_create(self, serializer):
         title_id = self.kwargs['title_id']
@@ -95,12 +100,12 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthorOrReadOnly]
+    permission_classes = [IsAuthorOrReadOnly, IsAuthenticatedOrReadOnly]
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
         review_id = self.kwargs['review_id']
-        return Comment.objects.filter(review__id=review_id)
+        return Comment.objects.filter(review__id=review_id).order_by('id')
 
     def perform_create(self, serializer):
         review_id = self.kwargs['review_id']

@@ -2,10 +2,12 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core import validators
 
-from .constants import (MAX_LENGTH, EMAIL_LEHGTH)
-from .enums import UserRoles
+from .constants import (MAX_LENGTH, ADMIN,
+                        EMAIL_LEHGTH, ROLES, USER, MODERATOR)
+
 
 class User(AbstractUser):
+
     username = models.CharField(
         validators=[validators.RegexValidator(regex=r'^[\w.@+\- ]+$'), ],
         max_length=MAX_LENGTH,
@@ -20,6 +22,12 @@ class User(AbstractUser):
     bio = models.TextField(
         'Биография',
         blank=True,
+    )
+    role = models.CharField(
+        'Роль',
+        max_length=MAX_LENGTH,
+        choices=ROLES,
+        default=USER,
     )
     first_name = models.CharField(
         'Имя',
@@ -36,25 +44,22 @@ class User(AbstractUser):
         max_length=MAX_LENGTH,
         null=True
     )
-    
-    # Здесь нужно использовать группы для роли
-    groups = models.ManyToManyField(
-        'auth.Group',
-        related_name='custom_user_groups',
-        blank=True,
-        help_text='The groups this user belongs to.',
-        verbose_name='groups',
-    )
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        related_name='custom_user_permissions',
-        blank=True
-    )
 
-    # Используйте метод "is_..." для проверки роли
-    def is_user(self):
-        return self.groups.filter(name=UserRoles.user.value).exists()
-    def is_moderator(self):
-        return self.groups.filter(name=UserRoles.moderator.value).exists()
+    @property
     def is_admin(self):
-        return self.groups.filter(name=UserRoles.admin.value).exists()
+        return (
+            self.role == ADMIN
+            or self.is_superuser
+        )
+
+    @property
+    def is_moderator(self):
+        return (
+            self.role == MODERATOR
+            or self.is_superuser
+        )
+
+    class Meta:
+        ordering = ('username',)
+        verbose_name = 'пользователь'
+        verbose_name_plural = 'пользователи'

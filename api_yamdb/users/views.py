@@ -18,7 +18,7 @@ from .serializers import (
     TokenSerializer,
     UserSerializer,
 )
-from .enums import UserRoles
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -44,29 +44,10 @@ class UserViewSet(viewsets.ModelViewSet):
                 partial=True,
             )
             serializer.is_valid(raise_exception=True)
-            serializer.save()
+            serializer.save(role=request.user.role)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.data)
 
-    def create(self, request, *args, **kwargs):
-        serializer = UserSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        try:
-            user = User.objects.create(
-                email=serializer.validated_data['email'],
-                username=serializer.validated_data['username'],
-                first_name=serializer.validated_data.get('first_name'),
-                last_name=serializer.validated_data.get('last_name'),
-                bio=serializer.validated_data.get('bio'),
-            )
-            user.set_password(serializer.validated_data['password'])
-            user.save()
-
-            # Присваиваем роли по умолчанию
-            user.groups.add(UserRoles.user.value)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except IntegrityError as error:
-            return Response(f'{error}', status=status.HTTP_400_BAD_REQUEST)
 
 class SignUpView(views.APIView):
     permission_classes = (AllowAny,)
