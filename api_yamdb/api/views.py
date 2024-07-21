@@ -1,18 +1,33 @@
 from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
+from posts.models import Category, Genre, Title
 from rest_framework import filters, status, viewsets
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-
-from posts.models import Category, Comment, Genre, Review, Title
+from rest_framework.response import Response
+from reviews.models import Comment, Review
 
 from .filters import TitleFilter
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitleCreateSerializer, TitleSerializer)
+
+
+def get_update():
+    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+def get_partial_update(self, request):
+    instance = self.get_object()
+    serializer = self.get_serializer(
+        instance, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -24,10 +39,10 @@ class CategoryViewSet(viewsets.ModelViewSet):
     lookup_field = 'slug'
 
     def retrieve(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return get_update()
 
     def update(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return get_update()
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -39,10 +54,10 @@ class GenreViewSet(viewsets.ModelViewSet):
     lookup_field = 'slug'
 
     def retrieve(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return get_update()
 
     def update(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return get_update()
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -64,16 +79,10 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleSerializer
 
     def update(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return get_update()
 
     def partial_update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(
-            instance, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return get_partial_update(self, request)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -87,7 +96,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         title_id = self.kwargs['title_id']
-        title = Title.objects.get(id=title_id)
+        title = get_object_or_404(Title, id=title_id)
 
         if Review.objects.filter(
             title=title,
@@ -96,6 +105,12 @@ class ReviewViewSet(viewsets.ModelViewSet):
             raise ValidationError('You have already reviewed this title.')
 
         serializer.save(title=title, author=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        return get_update()
+
+    def partial_update(self, request, *args, **kwargs):
+        return get_partial_update(self, request)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -109,5 +124,11 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         review_id = self.kwargs['review_id']
-        review = Review.objects.get(id=review_id)
+        review = get_object_or_404(Review, id=review_id)
         serializer.save(review=review, author=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        return get_update()
+
+    def partial_update(self, request, *args, **kwargs):
+        return get_partial_update(self, request)

@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'django_filters',
     'users',
     'posts',
+    'reviews',
 ]
 
 MIDDLEWARE = [
@@ -87,10 +88,10 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
 
 # Convert Path objects to strings and correct tuple definition
 STATICFILES_DIRS = [str(BASE_DIR / 'static')]
-CSV_FILES_DIR = str(BASE_DIR / 'static/data')
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -119,5 +120,3 @@ LIST_PER_PAGE = 10
 EMAIL_ADMIN = 'admin@yamdb.ru'
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-
-EMAIL_FILE_PATH = (BASE_DIR, 'sent_emails')

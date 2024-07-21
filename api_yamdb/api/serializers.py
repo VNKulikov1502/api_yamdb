@@ -1,8 +1,8 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
-from rest_framework import serializers
-
-from posts.models import Category, Comment, Genre, Review, Title
 from django.db import models
+from posts.models import Category, Genre, Title
+from rest_framework import serializers
+from reviews.models import Comment, Review
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -46,6 +46,7 @@ class TitleCreateSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     score = serializers.IntegerField(validators=[MinValueValidator(1),
                                                  MaxValueValidator(10)])
+    author = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = Review
@@ -53,7 +54,8 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = Comment
-        fields = '__all__'
+        fields = ('id', 'text', 'author', 'pub_date',)
