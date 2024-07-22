@@ -30,39 +30,39 @@ def get_partial_update(self, request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all().order_by('id')  # Добавьте order_by
+class CategoryGenreViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    ordering = ['id']
+    lookup_field = 'slug'
+
+    def retrieve(self, request, *args, **kwargs):
+        return get_update()
+
+    def update(self, request, *args, **kwargs):
+        return get_update()
+
+
+class CategoryViewSet(CategoryGenreViewSet):
+    queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [IsAdminOrReadOnly]
-    filter_backends = [filters.SearchFilter]
+    ordering_fields = ['name', 'slug']
     search_fields = ['name']
-    lookup_field = 'slug'
-
-    def retrieve(self, request, *args, **kwargs):
-        return get_update()
-
-    def update(self, request, *args, **kwargs):
-        return get_update()
 
 
-class GenreViewSet(viewsets.ModelViewSet):
-    queryset = Genre.objects.all().order_by('id')  # Добавьте order_by
+class GenreViewSet(CategoryGenreViewSet):
+    queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = [IsAdminOrReadOnly]
-    filter_backends = [filters.SearchFilter]
+    ordering_fields = ['name', 'slug']
     search_fields = ['name']
-    lookup_field = 'slug'
-
-    def retrieve(self, request, *args, **kwargs):
-        return get_update()
-
-    def update(self, request, *args, **kwargs):
-        return get_update()
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
-    filter_backends = [DjangoFilterBackend]
+
+    filter_backends = [DjangoFilterBackend,
+                       filters.OrderingFilter]
+    ordering = ['name']
     filterset_class = TitleFilter
     pagination_class = PageNumberPagination
 
@@ -70,7 +70,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         return (
             Title.objects
             .annotate(rating=Avg('reviews__score'))
-            .order_by('id')
         )
 
     def get_serializer_class(self):
