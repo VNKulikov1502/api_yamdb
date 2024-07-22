@@ -44,6 +44,11 @@ class User(AbstractUser):
         null=True
     )
 
+    class Meta:
+        ordering = ('username',)
+        verbose_name = 'пользователь'
+        verbose_name_plural = 'пользователи'
+
     @property
     def is_admin(self):
         return (
@@ -57,8 +62,3 @@ class User(AbstractUser):
             self.role == MODERATOR
             or self.is_superuser
         )
-
-    class Meta:
-        ordering = ('username',)
-        verbose_name = 'пользователь'
-        verbose_name_plural = 'пользователи'
