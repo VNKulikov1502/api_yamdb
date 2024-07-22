@@ -7,16 +7,22 @@ from users.models import User
 class Review(models.Model):
     title = models.ForeignKey(Title, on_delete=models.CASCADE,
                               related_name='reviews')
-    text = models.CharField(max_length=4096)
+    text = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                related_name='reviews')
-    score = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(10)]
+    score = models.PositiveSmallIntegerField(
+        validators=[
+            MinValueValidator(1, message="Score must be at least 1."),
+            MaxValueValidator(10, message="Score must be at most 10.")
+        ]
     )
     pub_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ['title', 'author']
+        constraints = [
+            models.UniqueConstraint(fields=['title', 'author'],
+                                    name='unique_review')
+        ]
 
     def __str__(self):
         return self.text
@@ -25,10 +31,10 @@ class Review(models.Model):
 class Comment(models.Model):
     review = models.ForeignKey(Review, on_delete=models.CASCADE,
                                related_name='comments')
-    text = models.TextField(max_length=512)
+    text = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                related_name='comments')
     pub_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.text
+        return self.text[20:]

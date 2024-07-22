@@ -64,6 +64,23 @@ class ReviewSerializer(serializers.ModelSerializer):
                     MaxValueValidator(10)])
     author = serializers.StringRelatedField(read_only=True)
 
+    def validate(self, data):
+        request = self.context.get('request')
+        title = self.context.get('title')
+        if request and request.method == 'POST':
+            if Review.objects.filter(title=title,
+                                     author=request.user).exists():
+                raise serializers.ValidationError(
+                    'You have already reviewed this title.'
+                )
+        return data
+
+    def create(self, validated_data):
+        review = Review.objects.create(
+            **validated_data
+        )
+        return review
+
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date',)
