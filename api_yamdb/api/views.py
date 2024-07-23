@@ -89,10 +89,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthorOrReadOnly, IsAuthenticatedOrReadOnly]
     pagination_class = PageNumberPagination
+    http_method_names = ['get', 'post', 'delete', 'patch']
 
     def get_queryset(self):
         title_id = get_title_id(self)
-        return Review.objects.filter(title__id=title_id).order_by('id')
+        return Review.objects.filter(title__id=title_id)
 
     def perform_create(self, serializer):
         title_id = get_title_id(self)
@@ -105,9 +106,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
         context['title'] = get_object_or_404(Title, id=title_id)
         return context
 
-    def update(self, request, *args, **kwargs):
-        return get_update()
-
     def partial_update(self, request, *args, **kwargs):
         return get_partial_update(self, request)
 
@@ -116,18 +114,16 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [IsAuthorOrReadOnly, IsAuthenticatedOrReadOnly]
     pagination_class = PageNumberPagination
+    http_method_names = ['get', 'post', 'delete', 'patch']
 
     def get_queryset(self):
         review_id = get_review_id(self)
-        return Comment.objects.filter(review__id=review_id).order_by('id')
+        return Comment.objects.filter(review__id=review_id)
 
     def perform_create(self, serializer):
         review_id = get_review_id(self)
         review = get_object_or_404(Review, id=review_id)
         serializer.save(review=review, author=self.request.user)
-
-    def update(self, request, *args, **kwargs):
-        return get_update()
 
     def partial_update(self, request, *args, **kwargs):
         return get_partial_update(self, request)

@@ -74,12 +74,6 @@ class ReviewSerializer(serializers.ModelSerializer):
                 )
         return data
 
-    def create(self, validated_data):
-        review = Review.objects.create(
-            **validated_data
-        )
-        return review
-
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date',)
