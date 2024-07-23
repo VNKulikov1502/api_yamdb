@@ -1,9 +1,7 @@
-import datetime
-
-from django.core.validators import MaxValueValidator
 from django.db import models
 
 from api.constants import MAX_NAME_LENGTH, MAX_SLUG_LENGTH
+from posts.validators import validate_year
 
 
 class Category(models.Model):
@@ -51,8 +49,7 @@ class Title(models.Model):
         help_text='Название произведения')
     year = models.SmallIntegerField(
         'Год выхода',
-        validators=[
-            MaxValueValidator(datetime.date.today().year)]
+        validators=[validate_year],
     )
 
     description = models.TextField(

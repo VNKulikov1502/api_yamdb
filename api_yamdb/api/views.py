@@ -66,12 +66,12 @@ class GenreViewSet(CategoryGenreViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
-
     filter_backends = [DjangoFilterBackend,
                        filters.OrderingFilter]
     ordering = ['name']
     filterset_class = TitleFilter
     pagination_class = PageNumberPagination
+    http_method_names = ['get', 'post', 'delete', 'patch']
 
     def get_queryset(self):
         return (
@@ -83,12 +83,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.action in ('create', 'update', 'partial_update'):
             return TitleCreateSerializer
         return TitleSerializer
-
-    def update(self, request, *args, **kwargs):
-        return get_update()
-
-    def partial_update(self, request, *args, **kwargs):
-        return get_partial_update(self, request)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
